@@ -7,84 +7,99 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --primary: #38bdf8;
-            --secondary: #fb7185;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --primary: #0284c7;
+            --secondary: #e11d48;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
         }
 
         body {
-            font-family: 'Pretendard', sans-serif;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 30px;
         }
 
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            border-bottom: 1px solid #334155;
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--border-color);
             padding-bottom: 20px;
         }
 
         .header h1 {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 800;
             margin: 0;
-            background: linear-gradient(to right, #38bdf8, #818cf8);
+            background: linear-gradient(to right, #0284c7, #4f46e5);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
         }
 
         .card {
             background: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
-            border: 1px solid #334155;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
         .card-title {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-bottom: 15px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
 
         .metric-value {
-            font-size: 2rem;
-            font-weight: 700;
+            font-size: 2.5rem;
+            font-weight: 800;
             color: var(--primary);
+            letter-spacing: -0.02em;
         }
 
         .metric-label {
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: var(--text-muted);
+            margin-top: 5px;
+            font-weight: 500;
         }
 
         .chart-container {
-            height: 250px;
+            height: 300px;
             position: relative;
+            margin-top: 15px;
         }
 
         .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            background: #0ea5e920;
-            color: var(--primary);
-            border: 1px solid #0ea5e940;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
         }
     </style>
 </head>
@@ -140,14 +155,25 @@
             data: {
                 labels: ['v0.1', 'v0.5', 'v1.0', 'v1.2'],
                 datasets: [{
+                    label: 'F1-Score',
                     data: [0.72, 0.85, 0.92, 0.948],
-                    borderColor: '#38bdf8',
+                    borderColor: '#0284c7',
+                    borderWidth: 3,
                     tension: 0.4,
                     fill: true,
-                    backgroundColor: 'rgba(56, 189, 248, 0.1)'
+                    backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4
                 }]
             },
-            options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+            options: { 
+                plugins: { legend: { display: false } }, 
+                scales: { 
+                    x: { title: { display: true, text: '학습 단계 (Version)', font: { weight: 'bold' } }, grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } }, 
+                    y: { title: { display: true, text: '정밀도', font: { weight: 'bold' } }, grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' }, min: 0.5, max: 1.0 } 
+                } 
+            }
         });
 
         // MAE Mini Chart
@@ -156,14 +182,25 @@
             data: {
                 labels: ['v0.1', 'v0.5', 'v1.0', 'v1.2'],
                 datasets: [{
+                    label: 'MAE',
                     data: [0.45, 0.32, 0.18, 0.12],
-                    borderColor: '#fb7185',
+                    borderColor: '#e11d48',
+                    borderWidth: 3,
                     tension: 0.4,
                     fill: true,
-                    backgroundColor: 'rgba(251, 113, 133, 0.1)'
+                    backgroundColor: 'rgba(225, 29, 72, 0.1)',
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4
                 }]
             },
-            options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+            options: { 
+                plugins: { legend: { display: false } }, 
+                scales: { 
+                    x: { title: { display: true, text: '학습 단계 (Version)', font: { weight: 'bold' } }, grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } }, 
+                    y: { title: { display: true, text: '오차 (kg)', font: { weight: 'bold' } }, grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' }, min: 0 } 
+                } 
+            }
         });
 
         // Feature Importance Chart
@@ -174,15 +211,24 @@
                 datasets: [{
                     label: '영향도 (%)',
                     data: [42, 18, 15, 12, 8, 5],
-                    backgroundColor: '#38bdf8'
+                    backgroundColor: 'rgba(2, 132, 199, 0.8)',
+                    borderRadius: 8,
+                    borderWidth: 0
                 }]
             },
             options: {
                 indexAxis: 'y',
                 plugins: { legend: { display: false } },
                 scales: { 
-                    x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
-                    y: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                    x: { 
+                        title: { display: true, text: '중요도 비중 (%)', font: { weight: 'bold' } },
+                        grid: { color: '#f1f5f9' }, 
+                        ticks: { color: '#64748b' } 
+                    },
+                    y: { 
+                        grid: { display: false }, 
+                        ticks: { color: '#0f172a', font: { weight: 'bold' } } 
+                    }
                 }
             }
         });
@@ -194,11 +240,20 @@
                 labels: ['저감됨', '잔여량'],
                 datasets: [{
                     data: [24.5, 75.5],
-                    backgroundColor: ['#4ade80', '#1e293b'],
+                    backgroundColor: ['#10b981', '#f1f5f9'],
                     borderWidth: 0
                 }]
             },
-            options: { cutout: '80%', plugins: { legend: { display: false } } }
+            options: { 
+                cutout: '80%', 
+                plugins: { 
+                    legend: { 
+                        display: true, 
+                        position: 'bottom',
+                        labels: { boxWidth: 12, font: { weight: 'bold' } }
+                    } 
+                } 
+            }
         });
     </script>
 </body>
