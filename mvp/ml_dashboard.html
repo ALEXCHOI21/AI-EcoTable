@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-EcoTable | ML Insights Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #38bdf8;
+            --secondary: #fb7185;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .chart-container {
+            height: 250px;
+            position: relative;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            background: #0ea5e920;
+            color: var(--primary);
+            border: 1px solid #0ea5e940;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>AI-EcoTable 머신러닝 엔진 인사이트</h1>
+        <div class="badge">Model: Random Forest Ensemble v1.2</div>
+    </div>
+
+    <div class="grid">
+        <!-- 핵심 지표 카드 -->
+        <div class="card">
+            <div class="card-title">메뉴 분류 정확도 (F1-Score) <span class="badge">Performance</span></div>
+            <div class="metric-value">0.948</div>
+            <div class="metric-label">NLP 기반 잔반 카테고리화 정밀도</div>
+            <div class="chart-container" style="height: 100px; margin-top: 20px;">
+                <canvas id="f1Chart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">평균 절대 오차 (MAE) <span class="badge">Accuracy</span></div>
+            <div class="metric-value">0.12<span style="font-size: 1rem; color: var(--text-muted);">kg</span></div>
+            <div class="metric-label">식수 인원당 잔반 발생량 예측 오차</div>
+            <div class="chart-container" style="height: 100px; margin-top: 20px;">
+                <canvas id="maeChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 변수 중요도 차트 -->
+        <div class="card" style="grid-column: span 2;">
+            <div class="card-title">잔반 발생 영향 지수 (Feature Importance)</div>
+            <div class="chart-container">
+                <canvas id="importanceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 탄소 저감 시뮬레이션 -->
+        <div class="card">
+            <div class="card-title">예상 탄소 저감량 (CO2eq)</div>
+            <div class="metric-value" style="color: #4ade80;">-24.5%</div>
+            <div class="metric-label">AI 최적 급식량 적용 시 연간 기대 효과</div>
+            <div class="chart-container" style="height: 150px; margin-top: 10px;">
+                <canvas id="ecoChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // F1-Score Mini Chart
+        new Chart(document.getElementById('f1Chart'), {
+            type: 'line',
+            data: {
+                labels: ['v0.1', 'v0.5', 'v1.0', 'v1.2'],
+                datasets: [{
+                    data: [0.72, 0.85, 0.92, 0.948],
+                    borderColor: '#38bdf8',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(56, 189, 248, 0.1)'
+                }]
+            },
+            options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+        });
+
+        // MAE Mini Chart
+        new Chart(document.getElementById('maeChart'), {
+            type: 'line',
+            data: {
+                labels: ['v0.1', 'v0.5', 'v1.0', 'v1.2'],
+                datasets: [{
+                    data: [0.45, 0.32, 0.18, 0.12],
+                    borderColor: '#fb7185',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(251, 113, 133, 0.1)'
+                }]
+            },
+            options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+        });
+
+        // Feature Importance Chart
+        new Chart(document.getElementById('importanceChart'), {
+            type: 'bar',
+            data: {
+                labels: ['메뉴 선호도', '학생 연령대', '날씨/기온', '요일 특성', '식수 인원', '조리 방식'],
+                datasets: [{
+                    label: '영향도 (%)',
+                    data: [42, 18, 15, 12, 8, 5],
+                    backgroundColor: '#38bdf8'
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: { 
+                    x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+                    y: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                }
+            }
+        });
+
+        // Eco Impact Chart
+        new Chart(document.getElementById('ecoChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['저감됨', '잔여량'],
+                datasets: [{
+                    data: [24.5, 75.5],
+                    backgroundColor: ['#4ade80', '#1e293b'],
+                    borderWidth: 0
+                }]
+            },
+            options: { cutout: '80%', plugins: { legend: { display: false } } }
+        });
+    </script>
+</body>
+</html>

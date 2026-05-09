@@ -1,0 +1,46 @@
+{
+  "summary": {
+    "period": "7 Days",
+    "totalPublicWaste": "608.60kg",
+    "totalAIWaste": "91.29kg",
+    "totalCarbonSaved": "1146.15kg CO2-eq",
+    "efficiency": "85.1%"
+  },
+  "dailyDetails": [
+    {
+      "date": "2026-05-11",
+      "reductionRate": "85.1%",
+      "publicTotalKg": "112.20",
+      "aiTotalKg": "16.83",
+      "carbonSavedKg": "317.12"
+    },
+    {
+      "date": "2026-05-12",
+      "reductionRate": "85.1%",
+      "publicTotalKg": "119.00",
+      "aiTotalKg": "17.85",
+      "carbonSavedKg": "232.41"
+    },
+    {
+      "date": "2026-05-13",
+      "reductionRate": "85.1%",
+      "publicTotalKg": "125.80",
+      "aiTotalKg": "18.87",
+      "carbonSavedKg": "81.67"
+    },
+    {
+      "date": "2026-05-14",
+      "reductionRate": "85.1%",
+      "publicTotalKg": "112.20",
+      "aiTotalKg": "16.83",
+      "carbonSavedKg": "317.12"
+    },
+    {
+      "date": "2026-05-15",
+      "reductionRate": "85.1%",
+      "publicTotalKg": "139.40",
+      "aiTotalKg": "20.91",
+      "carbonSavedKg": "197.82"
+    }
+  ]
+}

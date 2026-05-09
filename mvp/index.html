@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-EcoTable MVP</title>
+    <!-- 폰트: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-green: #10b981;
+            --accent-glow: rgba(16, 185, 129, 0.4);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top right, #1e293b, var(--bg-color));
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            padding: 2rem 0;
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #10b981, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            margin: 0.5rem 0 0;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        main {
+            width: 90%;
+            max-width: 1200px;
+            margin: 3rem auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px var(--accent-glow);
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            border-bottom: 2px solid var(--accent-green);
+            display: inline-block;
+            padding-bottom: 0.5rem;
+        }
+
+        /* Form Elements */
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        input[type="month"] {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+        }
+        
+        input[type="month"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        button {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 12px;
+            background: var(--accent-green);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        button:hover {
+            background: #059669;
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
+
+        /* Results Area */
+        #apiResult {
+            margin-top: 1.5rem;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        /* 스크롤바 디자인 */
+        #apiResult::-webkit-scrollbar { width: 8px; }
+        #apiResult::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        #apiResult::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.5); border-radius: 10px; }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            margin-bottom: 0.8rem;
+            border-left: 4px solid var(--glass-border);
+        }
+
+        .menu-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .ai-recommendation {
+            font-size: 0.9rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .recommend-down {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .recommend-normal {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+
+        /* Loading Spinner */
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--accent-green);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+            display: none;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @media (max-width: 900px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>AI-EcoTable</h1>
+        <p>데이터 기반 지능형 급식 조리량 제어 & 탄소 저감 대시보드</p>
+    </header>
+
+    <main>
+        <!-- 실시간 API 테스트 섹션 -->
+        <section class="glass-card">
+            <h2>🌍 실시간 나이스 API 연동 (실제 데이터)</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                특정 '월(Month)'을 선택하면, 해당 월의 전체 실제 식단 데이터를 나이스 개방포털에서 실시간으로 스크래핑하여 AI 시뮬레이션 기반 데이터로 변환합니다. (예: 2024년 5월)
+            </p>
+            
+            <div class="input-group">
+                <input type="month" id="mealMonth" value="2024-05">
+                <button onclick="fetchMealData()">실제 데이터 불러오기</button>
+            </div>
+
+            <div class="loader" id="loader"></div>
+            
+            <div id="apiResult">
+                <div style="text-align: center; color: var(--text-muted); margin-top: 3rem;">
+                    조회할 연/월을 선택하고 분석을 실행해 주세요.
+                </div>
+            </div>
+        </section>
+
+        <!-- 1년 시뮬레이션 J-Curve 차트 섹션 -->
+        <section class="glass-card">
+            <h2>📈 실데이터 기반 12개월 탄소 저감 시뮬레이션</h2>
+            <p id="chartDesc" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                좌측에서 분석된 실제 급식 데이터(1개월 치)를 기반으로, 4분기(12개월) 동안 AI 피드백 루프를 가동했을 때의 예상 J-Curve입니다.
+            </p>
+            <div class="chart-container">
+                <canvas id="yearlyChart"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // 전역 차트 인스턴스
+        let yearlyChartInstance = null;
+
+        // 학교 상수 (가락고등학교 - 서울과학고 등 임의의 유효한 학교 코드)
+        const ATPT_OFCDC_SC_CODE = 'B10'; 
+        const SD_SCHUL_CODE = '7010057'; 
+
+        // AI 시뮬레이션 변수
+        const STUDENT_COUNT = 850;
+        
+        // 잔반 발생률 및 탄소 계수
+        const CATEGORIES = {
+            VEG: { keywords: ['나물', '무침', '샐러드', '채소', '김치'], wasteKg: 0.055, carbonF: 0.48 },
+            SOUP: { keywords: ['국', '찌개', '탕'], wasteKg: 0.040, carbonF: 0.85 },
+            RICE: { keywords: ['밥', '볶음밥', '죽'], wasteKg: 0.025, carbonF: 1.21 },
+            MEAT: { keywords: ['고기', '닭', '돼지', '소', '생선', '구이', '튀김'], wasteKg: 0.015, carbonF: 15.52 },
+            OTHER: { keywords: [], wasteKg: 0.010, carbonF: 0.45 }
+        };
+
+        // 메뉴 이름 정제
+        function cleanMenuName(rawName) {
+            return rawName.replace(/[^가-힣a-zA-Z0-9\s]/g, '').replace(/[0-9]/g, '').trim();
+        }
+
+        // 메뉴 카테고리화 및 분석
+        function categorizeMenu(menuName) {
+            for (let [cat, data] of Object.entries(CATEGORIES)) {
+                if (data.keywords.some(k => menuName.includes(k))) return cat;
+            }
+            return 'OTHER';
+        }
+
+        async function fetchMealData() {
+            const monthInput = document.getElementById('mealMonth').value; // YYYY-MM
+            if (!monthInput) {
+                alert("연/월을 선택해주세요.");
+                return;
+            }
+
+            const yyyymm = monthInput.replace(/-/g, '');
+            const resultDiv = document.getElementById('apiResult');
+            const loader = document.getElementById('loader');
+
+            resultDiv.innerHTML = '';
+            loader.style.display = 'block';
+
+            try {
+                // 특정 월의 전체 데이터를 호출
+                const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&ATPT_OFCDC_SC_CODE=${ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${SD_SCHUL_CODE}&MLSV_YMD=${yyyymm}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                loader.style.display = 'none';
+
+                if (data.RESULT && data.RESULT.CODE !== 'INFO-000') {
+                    resultDiv.innerHTML = `<div style="color: var(--danger); text-align: center; margin-top: 2rem;">해당 월의 데이터가 없습니다. (방학 또는 데이터 미등록)</div>`;
+                    return;
+                }
+
+                if (data.mealServiceDietInfo) {
+                    const rows = data.mealServiceDietInfo[1].row;
+                    const schoolName = rows[0].SCHUL_NM; // 실제 학교 이름
+                    const officeName = rows[0].ATPT_OFCDC_SC_NM; // 교육청 이름
+                    
+                    let totalMonthlyWaste = 0;
+                    let totalMonthlyCarbon = 0;
+                    
+                    // 증빙용 UI 블록 (API 요청 URL 및 원본 데이터 확인)
+                    let html = `
+                        <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px dashed var(--text-muted);">
+                            <div style="font-size: 0.8rem; color: #fbbf24; margin-bottom: 0.5rem;">[데이터 진위 증명 (Data Traceability)]</div>
+                            <div style="font-size: 0.8rem; word-break: break-all; margin-bottom: 0.3rem;"><strong>요청 URL:</strong> <a href="${url}" target="_blank" style="color: #3b82f6;">${url}</a></div>
+                            <div style="font-size: 0.8rem; margin-bottom: 0.5rem;"><strong>응답 출처:</strong> 나이스 교육정보 개방포털 (${officeName} <strong>${schoolName}</strong>)</div>
+                            <details style="font-size: 0.75rem; background: #000; padding: 0.5rem; border-radius: 8px;">
+                                <summary style="cursor: pointer; color: var(--accent-green); outline: none;">원본 JSON 데이터 보기 (클릭)</summary>
+                                <pre style="margin-top: 0.5rem; color: #a3e635; max-height: 150px; overflow-y: auto;">${JSON.stringify(data, null, 2).substring(0, 1000)}... (생략)</pre>
+                            </details>
+                        </div>
+                    `;
+
+                    html += `<div style="margin-bottom: 1rem; font-weight: bold; color: var(--accent-green);">✅ ${monthInput}월 총 ${rows.length}일치 식단 분석 (대상: ${schoolName})</div>`;
+                    
+                    // 최근 3일치만 UI에 샘플로 표출 (너무 길어지는 것 방지)
+                    const displayRows = rows.slice(0, 3);
+                    displayRows.forEach(row => {
+                        html += `<div style="margin: 1rem 0 0.5rem; font-size: 0.9rem; color: var(--text-muted);">${row.MLSV_YMD.substring(0,4)}-${row.MLSV_YMD.substring(4,6)}-${row.MLSV_YMD.substring(6,8)} 식단</div>`;
+                        const rawMenus = row.DDISH_NM.split('<br/>');
+                        rawMenus.forEach(rawMenu => {
+                            const cleanName = cleanMenuName(rawMenu);
+                            if(cleanName) {
+                                const cat = categorizeMenu(cleanName);
+                                let label = '적정량 조리 권장';
+                                let cssClass = 'recommend-normal';
+                                if (cat === 'VEG' || cat === 'SOUP') {
+                                    label = '🚨 조리량 35% 하향 권장';
+                                    cssClass = 'recommend-down';
+                                }
+                                html += `
+                                    <div class="menu-item">
+                                        <span class="menu-name">${rawMenu}</span> <!-- 원본 메뉴명(알러지 포함) 그대로 노출하여 리얼리티 부여 -->
+                                        <span class="ai-recommendation ${cssClass}">${label}</span>
+                                    </div>
+                                `;
+                            }
+                        });
+                    });
+                    
+                    html += `<div style="text-align: center; color: var(--text-muted); margin-top: 1rem;">... 외 ${rows.length - 3}일치 데이터 분석 완료 ...</div>`;
+
+                    // 전체 달력 데이터 기반 시뮬레이션 계산
+                    rows.forEach(row => {
+                        const rawMenus = row.DDISH_NM.split('<br/>');
+                        rawMenus.forEach(rawMenu => {
+                            const cleanName = cleanMenuName(rawMenu);
+                            if(cleanName) {
+                                const cat = categorizeMenu(cleanName);
+                                // 1번 배식 시 해당 메뉴의 예상 잔반량 = 학생수 * 기준치
+                                const waste = STUDENT_COUNT * CATEGORIES[cat].wasteKg;
+                                totalMonthlyWaste += waste;
+                                totalMonthlyCarbon += (waste * CATEGORIES[cat].carbonF);
+                            }
+                        });
+                    });
+
+                    html += `<div style="margin-top: 1.5rem; padding: 1rem; background: rgba(16,185,129,0.1); border-radius: 12px; border: 1px solid var(--accent-green); text-align: center;">
+                        <strong style="color: var(--accent-green);">AI Insight (월간 요약):</strong> 이 달의 실제 메뉴 구성상, 아무 조치를 취하지 않을 경우 <strong>약 ${totalMonthlyWaste.toFixed(0)}kg</strong>의 잔반이 발생합니다.
+                    </div>`;
+
+                    resultDiv.innerHTML = html;
+
+                    // 차트 업데이트 (이 달의 데이터를 1분기(3개월) 기준으로 증폭하여 1년 시뮬레이션)
+                    updateChartRealData(totalMonthlyWaste, totalMonthlyCarbon);
+                }
+            } catch (error) {
+                loader.style.display = 'none';
+                console.error(error);
+                resultDiv.innerHTML = `<div style="color: var(--danger); text-align: center; margin-top: 2rem;">API 호출 중 오류가 발생했습니다. 브라우저 콘솔을 확인해주세요.</div>`;
+            }
+        }
+
+        function updateChartRealData(monthlyWaste, monthlyCarbon) {
+            // Q1 (1~3개월) 베이스라인: 1달치 데이터 * 3
+            const q1Waste = monthlyWaste * 3;
+            const q1Carbon = monthlyCarbon * 3;
+
+            // Q2: 35% 감소
+            const q2Waste = q1Waste * 0.65;
+            const q2CarbonSaved = (q1Waste - q2Waste) * (q1Carbon / q1Waste); // 비율대로 탄소 절감
+
+            // Q3: 65% 감소
+            const q3Waste = q1Waste * 0.35;
+            const q3CarbonSaved = (q1Waste - q3Waste) * (q1Carbon / q1Waste);
+
+            // Q4: 85% 감소
+            const q4Waste = q1Waste * 0.15;
+            const q4CarbonSaved = (q1Waste - q4Waste) * (q1Carbon / q1Waste);
+
+            const wasteData = [q1Waste.toFixed(1), q2Waste.toFixed(1), q3Waste.toFixed(1), q4Waste.toFixed(1)];
+            
+            // 누적 탄소 저감량 계산
+            const cQ1 = 0;
+            const cQ2 = q2CarbonSaved;
+            const cQ3 = cQ2 + q3CarbonSaved;
+            const cQ4 = cQ3 + q4CarbonSaved;
+            const carbonCumulativeData = [cQ1.toFixed(1), cQ2.toFixed(1), cQ3.toFixed(1), cQ4.toFixed(1)];
+
+            document.getElementById('chartDesc').innerHTML = `
+                방금 불러온 <strong>실제 공공데이터 메뉴 구성</strong>을 바탕으로 분석된 12개월 동적 시뮬레이션입니다.<br>
+                1년 도입 시 누적 <strong>${cQ4.toFixed(0)} kg CO2-eq</strong>의 실질적인 탄소 배출을 억제합니다.
+            `;
+
+            renderChart(wasteData, carbonCumulativeData);
+        }
+
+        function renderChart(wasteData, carbonCumulativeData) {
+            const ctx = document.getElementById('yearlyChart').getContext('2d');
+            const labels = ['Q1 (수집)', 'Q2 (1차 적용)', 'Q3 (정교화)', 'Q4 (안정화)'];
+
+            if (yearlyChartInstance) {
+                yearlyChartInstance.destroy();
+            }
+
+            yearlyChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '발생 잔반량 (kg)',
+                            data: wasteData,
+                            backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                            borderColor: '#ef4444',
+                            borderWidth: 2,
+                            borderRadius: 6,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '누적 탄소 저감량 (kg CO2-eq)',
+                            data: carbonCumulativeData,
+                            type: 'line',
+                            borderColor: '#10b981',
+                            backgroundColor: '#10b981',
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#10b981',
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            borderWidth: 3,
+                            fill: false,
+                            tension: 0.4,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { labels: { color: '#f8fafc', font: { family: 'Inter', size: 13 } } },
+                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { size: 14 }, padding: 12 }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                        y: {
+                            type: 'linear', display: true, position: 'left',
+                            title: { display: true, text: '잔반량 (kg)', color: '#ef4444', font: { weight: 'bold' } },
+                            ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        },
+                        y1: {
+                            type: 'linear', display: true, position: 'right',
+                            title: { display: true, text: '누적 탄소 저감량 (kg)', color: '#10b981', font: { weight: 'bold' } },
+                            ticks: { color: '#94a3b8' }, grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 초기 렌더링 시 빈 차트(0)로 시작
+        window.onload = function() {
+            renderChart([0,0,0,0], [0,0,0,0]);
+            
+            // 날짜 기본값을 현재 년월로 세팅
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            let mm = today.getMonth() + 1; // Months start at 0!
+            if (mm < 10) mm = '0' + mm;
+            document.getElementById('mealMonth').value = yyyy + '-' + mm;
+        };
+    </script>
+</body>
+</html>
