@@ -548,20 +548,58 @@
             document.getElementById('mealMonth').value = yyyy + '-' + mm;
         };
 
-        // 고해상도 차트 저장 함수 (5x Scale)
         function downloadChart(chartId, filename) {
             const originalChart = Chart.getChart(chartId);
             if(!originalChart) return;
 
+            const title = "AI-EcoTable 12개월 탄소 저감 시뮬레이션";
+            const desc = document.getElementById('chartDesc').innerText;
+
             const tempCanvas = document.createElement('canvas');
-            const scale = 5; // 초고해상도 (5x)
+            const scale = 4; // 고해상도 (4x)
             
-            tempCanvas.width = originalChart.width * scale;
-            tempCanvas.height = originalChart.height * scale;
+            const padding = 40;
+            const headerHeight = 100;
+            tempCanvas.width = (originalChart.width + padding * 2) * scale;
+            tempCanvas.height = (originalChart.height + headerHeight + padding * 2) * scale;
             
             const ctx = tempCanvas.getContext('2d');
+            ctx.scale(scale, scale);
             
-            const tempChart = new Chart(ctx, {
+            // 1. 배경색
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, tempCanvas.width / scale, tempCanvas.height / scale);
+            
+            // 2. 제목
+            ctx.fillStyle = '#1e293b';
+            ctx.font = 'bold 20px "Inter", sans-serif';
+            ctx.fillText(title, padding, padding + 20);
+            
+            // 3. 설명 (자동 줄바꿈 처리)
+            ctx.fillStyle = '#64748b';
+            ctx.font = '500 13px "Inter", sans-serif';
+            const words = desc.split(' ');
+            let line = '';
+            let y = padding + 50;
+            for(let n = 0; n < words.length; n++) {
+                let testLine = line + words[n] + ' ';
+                let metrics = ctx.measureText(testLine);
+                if (metrics.width > (tempCanvas.width / scale - padding * 2) && n > 0) {
+                    ctx.fillText(line, padding, y);
+                    line = words[n] + ' ';
+                    y += 20;
+                } else {
+                    line = testLine;
+                }
+            }
+            ctx.fillText(line, padding, y);
+
+            // 4. 차트용 별도 캔버스 생성 및 렌더링
+            const chartCanvas = document.createElement('canvas');
+            chartCanvas.width = originalChart.width * scale;
+            chartCanvas.height = originalChart.height * scale;
+            
+            const tempChart = new Chart(chartCanvas, {
                 type: originalChart.config.type,
                 data: JSON.parse(JSON.stringify(originalChart.config.data)),
                 options: {
@@ -570,25 +608,25 @@
                     animation: false,
                     responsive: false,
                     maintainAspectRatio: false,
-                },
-                plugins: [{
-                    beforeDraw: (chart) => {
-                        const ctx = chart.ctx;
-                        ctx.save();
-                        ctx.fillStyle = 'white';
-                        ctx.fillRect(0, 0, chart.width, chart.height);
-                        ctx.restore();
-                    }
-                }]
+                }
             });
 
+            // 5. 합성 및 다운로드
             setTimeout(() => {
+                ctx.drawImage(chartCanvas, padding, y + 20, originalChart.width, originalChart.height);
+
+                // 푸터
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = 'bold 12px "Inter", sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText('AI-EcoTable: Data-Driven Carbon Reduction Simulation', tempCanvas.width / scale - padding, tempCanvas.height / scale - 15);
+
                 const link = document.createElement('a');
                 link.download = filename;
                 link.href = tempCanvas.toDataURL('image/png', 1.0);
                 link.click();
                 tempChart.destroy();
-            }, 300);
+            }, 500);
         }
     </script>
 </body>

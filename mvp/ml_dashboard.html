@@ -369,20 +369,63 @@
         });
 
         function downloadChart(chartId, filename) {
+            const canvas = document.getElementById(chartId);
             const originalChart = Chart.getChart(chartId);
+            if(!originalChart) return;
+
+            // 카드 엘리먼트에서 텍스트 정보 추출
+            const card = canvas.closest('.card');
+            const title = card.querySelector('.card-title span').innerText.split('\n')[0]; // 배지 제외 제목만
+            const value = card.querySelector('.metric-value').innerText;
+            const label = card.querySelector('.metric-label').innerText;
+
             const tempCanvas = document.createElement('canvas');
-            const scale = 5; // 초고해상도 (5x)
+            const scale = 4; // 고해상도 (4x) - 텍스트 포함 시 너무 크면 PPT에서 무거울 수 있어 4배로 조정
             
-            // 원본 캔버스의 비율 유지하며 크기 확장
-            tempCanvas.width = originalChart.width * scale;
-            tempCanvas.height = originalChart.height * scale;
+            // 이미지 전체 크기 설정 (텍스트 영역 확보)
+            const padding = 40;
+            const headerHeight = 120;
+            tempCanvas.width = (canvas.width + padding * 2) * scale;
+            tempCanvas.height = (canvas.height + headerHeight + padding * 2) * scale;
             
             const ctx = tempCanvas.getContext('2d');
+            ctx.scale(scale, scale);
             
-            // 고해상도 렌더링을 위해 새로운 차트 생성 (배경 흰색)
-            const tempChart = new Chart(ctx, {
+            // 1. 배경색 (흰색)
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, tempCanvas.width / scale, tempCanvas.height / scale);
+            
+            // 2. 제목 (Title)
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 18px "Pretendard", sans-serif';
+            ctx.fillText(title, padding, padding + 20);
+            
+            // 3. 현재 수치 (Value)
+            ctx.fillStyle = '#0284c7';
+            ctx.font = '800 42px "Pretendard", sans-serif';
+            ctx.fillText(value, padding, padding + 75);
+            
+            // 4. 설명 (Label)
+            ctx.fillStyle = '#64748b';
+            ctx.font = '500 14px "Pretendard", sans-serif';
+            ctx.fillText(label, padding, padding + 100);
+
+            // 5. 구분선
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(padding, padding + 120);
+            ctx.lineTo(tempCanvas.width / scale - padding, padding + 120);
+            ctx.stroke();
+
+            // 6. 차트용 별도 캔버스 생성 및 렌더링 (텍스트 지워짐 방지)
+            const chartCanvas = document.createElement('canvas');
+            chartCanvas.width = canvas.width * scale;
+            chartCanvas.height = canvas.height * scale;
+            
+            const tempChart = new Chart(chartCanvas, {
                 type: originalChart.config.type,
-                data: JSON.parse(JSON.stringify(originalChart.config.data)), // 데이터 복사
+                data: JSON.parse(JSON.stringify(originalChart.config.data)),
                 options: {
                     ...originalChart.config.options,
                     devicePixelRatio: scale,
@@ -390,28 +433,28 @@
                     responsive: false,
                     maintainAspectRatio: false,
                     plugins: {
-                        ...originalChart.config.options.plugins,
+                        legend: { display: false }
                     }
-                },
-                plugins: [{
-                    beforeDraw: (chart) => {
-                        const ctx = chart.ctx;
-                        ctx.save();
-                        ctx.fillStyle = 'white';
-                        ctx.fillRect(0, 0, chart.width, chart.height);
-                        ctx.restore();
-                    }
-                }]
+                }
             });
 
-            // 렌더링을 위한 짧은 지연 후 다운로드
+            // 7. 차트 렌더링 대기 후 합성
             setTimeout(() => {
+                // 차트 영역에 맞게 합성 (ctx.scale이 이미 적용되어 있으므로 unscaled 크기로 그림)
+                ctx.drawImage(chartCanvas, padding, padding + headerHeight + 20, canvas.width, canvas.height);
+
+                // 8. 푸터 (Branding)
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = 'bold 12px "Pretendard", sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText('AI-EcoTable Intelligence Engine Insight', tempCanvas.width / scale - padding, tempCanvas.height / scale - 15);
+
                 const link = document.createElement('a');
                 link.download = filename;
                 link.href = tempCanvas.toDataURL('image/png', 1.0);
                 link.click();
                 tempChart.destroy();
-            }, 200);
+            }, 500);
         }
     </script>
 </body>
