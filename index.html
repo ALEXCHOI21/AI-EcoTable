@@ -537,7 +537,6 @@
             });
         }
 
-        // 초기 렌더링 시 빈 차트(0)로 시작
         window.onload = function() {
             renderChart([0,0,0,0], [0,0,0,0]);
             
@@ -548,6 +547,49 @@
             if (mm < 10) mm = '0' + mm;
             document.getElementById('mealMonth').value = yyyy + '-' + mm;
         };
+
+        // 고해상도 차트 저장 함수 (5x Scale)
+        function downloadChart(chartId, filename) {
+            const originalChart = Chart.getChart(chartId);
+            if(!originalChart) return;
+
+            const tempCanvas = document.createElement('canvas');
+            const scale = 5; // 초고해상도 (5x)
+            
+            tempCanvas.width = originalChart.width * scale;
+            tempCanvas.height = originalChart.height * scale;
+            
+            const ctx = tempCanvas.getContext('2d');
+            
+            const tempChart = new Chart(ctx, {
+                type: originalChart.config.type,
+                data: JSON.parse(JSON.stringify(originalChart.config.data)),
+                options: {
+                    ...originalChart.config.options,
+                    devicePixelRatio: scale,
+                    animation: false,
+                    responsive: false,
+                    maintainAspectRatio: false,
+                },
+                plugins: [{
+                    beforeDraw: (chart) => {
+                        const ctx = chart.ctx;
+                        ctx.save();
+                        ctx.fillStyle = 'white';
+                        ctx.fillRect(0, 0, chart.width, chart.height);
+                        ctx.restore();
+                    }
+                }]
+            });
+
+            setTimeout(() => {
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = tempCanvas.toDataURL('image/png', 1.0);
+                link.click();
+                tempChart.destroy();
+            }, 300);
+        }
     </script>
 </body>
 </html>

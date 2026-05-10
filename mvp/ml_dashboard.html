@@ -234,6 +234,28 @@
             }
         });
 
+        // MAE Chart (추가됨)
+        new Chart(document.getElementById('maeChart'), {
+            type: 'line',
+            data: {
+                labels: versions,
+                datasets: [{
+                    label: 'MAE',
+                    data: [0.45, 0.28, 0.18, 0.12],
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    ...chartDefaults
+                }]
+            },
+            options: { 
+                plugins: { legend: { display: false } }, 
+                scales: { 
+                    x: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } }, 
+                    y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' }, min: 0 } 
+                } 
+            }
+        });
+
         // RMSE Chart
         new Chart(document.getElementById('rmseChart'), {
             type: 'line',
@@ -347,23 +369,49 @@
         });
 
         function downloadChart(chartId, filename) {
-            const canvas = document.getElementById(chartId);
+            const originalChart = Chart.getChart(chartId);
             const tempCanvas = document.createElement('canvas');
-            const scale = 3; // 더 고해상도(3x)
+            const scale = 5; // 초고해상도 (5x)
             
-            tempCanvas.width = canvas.width * scale;
-            tempCanvas.height = canvas.height * scale;
+            // 원본 캔버스의 비율 유지하며 크기 확장
+            tempCanvas.width = originalChart.width * scale;
+            tempCanvas.height = originalChart.height * scale;
             
             const ctx = tempCanvas.getContext('2d');
-            ctx.scale(scale, scale);
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(canvas, 0, 0);
             
-            const link = document.createElement('a');
-            link.download = filename;
-            link.href = tempCanvas.toDataURL('image/png', 1.0);
-            link.click();
+            // 고해상도 렌더링을 위해 새로운 차트 생성 (배경 흰색)
+            const tempChart = new Chart(ctx, {
+                type: originalChart.config.type,
+                data: JSON.parse(JSON.stringify(originalChart.config.data)), // 데이터 복사
+                options: {
+                    ...originalChart.config.options,
+                    devicePixelRatio: scale,
+                    animation: false,
+                    responsive: false,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        ...originalChart.config.options.plugins,
+                    }
+                },
+                plugins: [{
+                    beforeDraw: (chart) => {
+                        const ctx = chart.ctx;
+                        ctx.save();
+                        ctx.fillStyle = 'white';
+                        ctx.fillRect(0, 0, chart.width, chart.height);
+                        ctx.restore();
+                    }
+                }]
+            });
+
+            // 렌더링을 위한 짧은 지연 후 다운로드
+            setTimeout(() => {
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = tempCanvas.toDataURL('image/png', 1.0);
+                link.click();
+                tempChart.destroy();
+            }, 200);
         }
     </script>
 </body>
