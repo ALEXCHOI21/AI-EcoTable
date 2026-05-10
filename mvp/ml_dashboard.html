@@ -22,6 +22,8 @@
             color: var(--text-main);
             margin: 0;
             padding: 30px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .header {
@@ -194,6 +196,9 @@
     </div>
 
     <script>
+        // 차트 해상도 강제 상향 (캡처 시 선명도 확보)
+        Chart.defaults.devicePixelRatio = 3;
+        
         const versions = ['v0.1', 'v0.5', 'v1.0', 'v1.2'];
         
         const chartDefaults = {

@@ -35,6 +35,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         header {
@@ -282,6 +284,9 @@
     </main>
 
     <script>
+        // 차트 해상도 강제 상향 (캡처 시 선명도 확보)
+        Chart.defaults.devicePixelRatio = 3;
+
         // 전역 차트 인스턴스
         let simChartInstance = null;
 
