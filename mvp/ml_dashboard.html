@@ -114,7 +114,6 @@
         <div class="card">
             <div class="card-title">
                 <span>메뉴 분류 정확도 (F1-Score) <span class="badge">Classification</span></span>
-                <button onclick="downloadChart('f1Chart', 'ML_F1_Score.png')" style="padding: 4px 8px; font-size: 0.75rem; cursor: pointer; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">고해상도 PNG</button>
             </div>
             <div class="metric-value">0.948</div>
             <div class="metric-label">NLP 기반 메뉴 카테고리화 정밀도</div>
@@ -127,7 +126,6 @@
         <div class="card">
             <div class="card-title">
                 <span>평균 절대 오차 (MAE) <span class="badge">Regression</span></span>
-                <button onclick="downloadChart('maeChart', 'ML_MAE.png')" style="padding: 4px 8px; font-size: 0.75rem; cursor: pointer; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">고해상도 PNG</button>
             </div>
             <div class="metric-value">0.12<span style="font-size: 1rem; color: var(--text-muted);">kg</span></div>
             <div class="metric-label">식수 인원당 실제 잔반량과의 오차 거리</div>
@@ -140,7 +138,6 @@
         <div class="card">
             <div class="card-title">
                 <span>제곱근 평균 제곱 오차 (RMSE) <span class="badge">Stability</span></span>
-                <button onclick="downloadChart('rmseChart', 'ML_RMSE.png')" style="padding: 4px 8px; font-size: 0.75rem; cursor: pointer; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">고해상도 PNG</button>
             </div>
             <div class="metric-value">0.15<span style="font-size: 1rem; color: var(--text-muted);">kg</span></div>
             <div class="metric-label">특이치(Outlier)에 대한 모델의 견고성 지표</div>
@@ -153,7 +150,6 @@
         <div class="card">
             <div class="card-title">
                 <span>결정계수 (R² Score) <span class="badge">Reliability</span></span>
-                <button onclick="downloadChart('r2Chart', 'ML_R2.png')" style="padding: 4px 8px; font-size: 0.75rem; cursor: pointer; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">고해상도 PNG</button>
             </div>
             <div class="metric-value">0.962</div>
             <div class="metric-label">데이터 분산 대비 모델 설명력 (1.0 근접)</div>
@@ -166,7 +162,6 @@
         <div class="card">
             <div class="card-title">
                 <span>평균 절대 백분율 오차 (MAPE) <span class="badge">Intuition</span></span>
-                <button onclick="downloadChart('mapeChart', 'ML_MAPE.png')" style="padding: 4px 8px; font-size: 0.75rem; cursor: pointer; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">고해상도 PNG</button>
             </div>
             <div class="metric-value">4.8<span style="font-size: 1rem; color: var(--text-muted);">%</span></div>
             <div class="metric-label">배식량 대비 예측 오차의 상대적 비율</div>
@@ -179,7 +174,6 @@
         <div class="card" style="grid-column: span 1;">
             <div class="card-title">
                 <span>잔반 발생 영향 지수 (Importance)</span>
-                <button onclick="downloadChart('importanceChart', 'ML_Feature_Importance.png')" style="padding: 4px 8px; font-size: 0.75rem; cursor: pointer; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">고해상도 PNG</button>
             </div>
             <div class="chart-container" style="height: 250px;">
                 <canvas id="importanceChart"></canvas>
@@ -190,7 +184,6 @@
         <div class="card">
             <div class="card-title">
                 <span>예상 탄소 저감량 (CO2eq)</span>
-                <button onclick="downloadChart('ecoChart', 'ML_Eco_Simulation.png')" style="padding: 4px 8px; font-size: 0.75rem; cursor: pointer; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">고해상도 PNG</button>
             </div>
             <div class="metric-value" style="color: #10b981;">-24.5%</div>
             <div class="metric-label">AI 최적 급식량 적용 시 연간 기대 효과</div>
@@ -368,100 +361,6 @@
             }
         });
 
-        function downloadChart(chartId, filename) {
-            const canvas = document.getElementById(chartId);
-            const originalChart = Chart.getChart(chartId);
-            if(!originalChart) return;
-
-            // 카드 엘리먼트에서 텍스트 정보 추출
-            const card = canvas.closest('.card');
-            const title = card.querySelector('.card-title span').innerText.split('\n')[0]; // 배지 제외 제목만
-            const value = card.querySelector('.metric-value').innerText;
-            const label = card.querySelector('.metric-label').innerText;
-
-            const tempCanvas = document.createElement('canvas');
-            const scale = 4; // 고해상도 (4x) - 텍스트 포함 시 너무 크면 PPT에서 무거울 수 있어 4배로 조정
-            
-            // 이미지 전체 크기 설정 (텍스트 영역 확보 및 여백 추가)
-            const padding = 50;
-            const headerHeight = 140;
-            const footerHeight = 60; // 푸터 영역 추가 확보
-            tempCanvas.width = (canvas.width + padding * 2) * scale;
-            tempCanvas.height = (canvas.height + headerHeight + footerHeight + padding * 2) * scale;
-            
-            const ctx = tempCanvas.getContext('2d');
-            ctx.scale(scale, scale);
-            
-            // 1. 배경색 (흰색)
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, tempCanvas.width / scale, tempCanvas.height / scale);
-            
-            // 2. 제목 (Title)
-            ctx.fillStyle = '#0f172a';
-            ctx.font = 'bold 20px "Pretendard", sans-serif';
-            ctx.fillText(title, padding, padding + 25);
-            
-            // 3. 현재 수치 (Value)
-            ctx.fillStyle = '#0284c7';
-            ctx.font = '800 48px "Pretendard", sans-serif';
-            ctx.fillText(value, padding, padding + 85);
-            
-            // 4. 설명 (Label)
-            ctx.fillStyle = '#64748b';
-            ctx.font = '500 15px "Pretendard", sans-serif';
-            ctx.fillText(label, padding, padding + 115);
-
-            // 5. 구분선
-            ctx.strokeStyle = '#f1f5f9';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(padding, padding + 135);
-            ctx.lineTo(tempCanvas.width / scale - padding, padding + 135);
-            ctx.stroke();
-
-            // 6. 차트용 별도 캔버스 생성 및 렌더링 (텍스트 지워짐 방지)
-            const chartCanvas = document.createElement('canvas');
-            chartCanvas.width = canvas.width * scale;
-            chartCanvas.height = canvas.height * scale;
-            
-            const tempChart = new Chart(chartCanvas, {
-                type: originalChart.config.type,
-                data: JSON.parse(JSON.stringify(originalChart.config.data)),
-                options: {
-                    ...originalChart.config.options,
-                    devicePixelRatio: scale,
-                    animation: false,
-                    responsive: false,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
-
-            // 7. 차트 렌더링 대기 후 합성
-            setTimeout(() => {
-                // 차트 영역에 맞게 합성 (헤더 아래에 배치)
-                ctx.drawImage(chartCanvas, padding, padding + headerHeight + 10, canvas.width, canvas.height);
-
-                // 8. 푸터 (Premium Branding)
-                const footerY = tempCanvas.height / scale - 25;
-                ctx.fillStyle = '#cbd5e1';
-                ctx.font = 'bold 12px "Pretendard", sans-serif';
-                ctx.textAlign = 'left';
-                ctx.fillText('© 2026 ChoiGPT Corp. Strategic Intelligence', padding, footerY);
-                
-                ctx.textAlign = 'right';
-                ctx.fillStyle = '#94a3b8';
-                ctx.fillText('AI-EcoTable | ML Engine Insight Report v1.3', tempCanvas.width / scale - padding, footerY);
-
-                const link = document.createElement('a');
-                link.download = filename;
-                link.href = tempCanvas.toDataURL('image/png', 1.0);
-                link.click();
-                tempChart.destroy();
-            }, 600);
-        }
     </script>
 </body>
 </html>
