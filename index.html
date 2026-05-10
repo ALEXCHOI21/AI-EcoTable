@@ -276,14 +276,17 @@
                 좌측에서 분석된 실제 급식 데이터(1개월 치)를 기반으로, 4분기(12개월) 동안 AI 피드백 루프를 가동했을 때의 예상 J-Curve입니다.
             </p>
             <div class="chart-container">
-                <canvas id="yearlyChart"></canvas>
+                <canvas id="simChart"></canvas>
+            </div>
+            <div style="text-align: right; margin-top: 1rem;">
+                <button onclick="downloadChart('simChart', 'EcoTable_Simulation.png')" style="background: #0284c7; padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 8px;">고해상도 차트 저장 (PNG)</button>
             </div>
         </section>
     </main>
 
     <script>
         // 전역 차트 인스턴스
-        let yearlyChartInstance = null;
+        let simChartInstance = null;
 
         // 학교 상수 (가락고등학교 - 서울과학고 등 임의의 유효한 학교 코드)
         const ATPT_OFCDC_SC_CODE = 'B10'; 
@@ -359,13 +362,13 @@
                     
                     // 증빙용 UI 블록 (API 요청 URL 및 원본 데이터 확인)
                     let html = `
-                        <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px dashed var(--text-muted);">
-                            <div style="font-size: 0.8rem; color: #fbbf24; margin-bottom: 0.5rem;">[데이터 진위 증명 (Data Traceability)]</div>
-                            <div style="font-size: 0.8rem; word-break: break-all; margin-bottom: 0.3rem;"><strong>요청 URL:</strong> <a href="${url}" target="_blank" style="color: #3b82f6;">${url}</a></div>
-                            <div style="font-size: 0.8rem; margin-bottom: 0.5rem;"><strong>응답 출처:</strong> 나이스 교육정보 개방포털 (${officeName} <strong>${schoolName}</strong>)</div>
-                            <details style="font-size: 0.75rem; background: #000; padding: 0.5rem; border-radius: 8px;">
-                                <summary style="cursor: pointer; color: var(--accent-green); outline: none;">원본 JSON 데이터 보기 (클릭)</summary>
-                                <pre style="margin-top: 0.5rem; color: #a3e635; max-height: 150px; overflow-y: auto;">${JSON.stringify(data, null, 2).substring(0, 1000)}... (생략)</pre>
+                        <div style="background: #f8fafc; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                            <div style="font-size: 0.8rem; color: #0284c7; font-weight: bold; margin-bottom: 0.5rem;">[데이터 진위 증명 (Data Traceability)]</div>
+                            <div style="font-size: 0.8rem; color: #334155; word-break: break-all; margin-bottom: 0.3rem;"><strong>요청 URL:</strong> <a href="${url}" target="_blank" style="color: #2563eb;">${url}</a></div>
+                            <div style="font-size: 0.8rem; color: #334155; margin-bottom: 0.5rem;"><strong>응답 출처:</strong> 나이스 교육정보 개방포털 (${officeName} <strong>${schoolName}</strong>)</div>
+                            <details style="font-size: 0.75rem; background: #ffffff; padding: 0.5rem; border-radius: 8px; border: 1px solid #cbd5e1;">
+                                <summary style="cursor: pointer; color: #0f172a; font-weight: bold; outline: none;">원본 JSON 데이터 보기 (클릭)</summary>
+                                <pre style="margin-top: 0.5rem; color: #334155; max-height: 150px; overflow-y: auto;">${JSON.stringify(data, null, 2).substring(0, 1000)}... (생략)</pre>
                             </details>
                         </div>
                     `;
@@ -453,14 +456,14 @@
             const q4Waste = q1Waste * 0.15;
             const q4CarbonSaved = (q1Waste - q4Waste) * (q1Carbon / q1Waste);
 
-            const wasteData = [q1Waste.toFixed(1), q2Waste.toFixed(1), q3Waste.toFixed(1), q4Waste.toFixed(1)];
+            const wasteData = [q1Waste, q2Waste, q3Waste, q4Waste];
             
-            // 누적 탄소 저감량 계산
-            const cQ1 = 0;
+            // 누적 탄소 저감량 (Q1은 절감 0)
             const cQ2 = q2CarbonSaved;
             const cQ3 = cQ2 + q3CarbonSaved;
             const cQ4 = cQ3 + q4CarbonSaved;
-            const carbonCumulativeData = [cQ1.toFixed(1), cQ2.toFixed(1), cQ3.toFixed(1), cQ4.toFixed(1)];
+            
+            const carbonCumulativeData = [0, cQ2, cQ3, cQ4];
 
             document.getElementById('chartDesc').innerHTML = `
                 방금 불러온 <strong>실제 공공데이터 메뉴 구성</strong>을 바탕으로 분석된 12개월 동적 시뮬레이션입니다.<br>
@@ -470,15 +473,15 @@
             renderChart(wasteData, carbonCumulativeData);
         }
 
-        function renderChart(wasteData, carbonCumulativeData) {
-            const ctx = document.getElementById('yearlyChart').getContext('2d');
+        function renderChart(wasteData, carbonData) {
+            const ctx = document.getElementById('simChart').getContext('2d');
             const labels = ['Q1 (수집)', 'Q2 (1차 적용)', 'Q3 (정교화)', 'Q4 (안정화)'];
-
-            if (yearlyChartInstance) {
-                yearlyChartInstance.destroy();
+            
+            if(simChartInstance) {
+                simChartInstance.destroy();
             }
 
-            yearlyChartInstance = new Chart(ctx, {
+            simChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
@@ -494,7 +497,7 @@
                         },
                         {
                             label: '누적 탄소 저감량 (kg CO2-eq)',
-                            data: carbonCumulativeData,
+                            data: carbonData,
                             type: 'line',
                             borderColor: '#10b981',
                             backgroundColor: '#10b981',

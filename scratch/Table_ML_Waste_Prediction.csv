@@ -1,0 +1,6 @@
+Date,Preference_Score,Predicted_Waste_Rate,Risk_Level,Recommended_Portion_Factor
+2026-05-11,85,0.12,Low,1.0
+2026-05-12,75,0.18,Medium,0.95
+2026-05-13,60,0.22,High,0.85
+2026-05-14,95,0.05,Safe,1.05
+2026-05-15,65,0.20,High,0.9

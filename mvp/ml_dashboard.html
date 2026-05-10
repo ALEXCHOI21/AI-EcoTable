@@ -110,95 +110,192 @@
     </div>
 
     <div class="grid">
-        <!-- 핵심 지표 카드 -->
+        <!-- 핵심 지표 카드 0: F1-Score (추가/복구) -->
         <div class="card">
-            <div class="card-title">메뉴 분류 정확도 (F1-Score) <span class="badge">Performance</span></div>
+            <div class="card-title">
+                <span>메뉴 분류 정확도 (F1-Score) <span class="badge">Classification</span></span>
+                <button onclick="downloadChart('f1Chart', 'ML_F1_Score.png')" style="padding: 4px 8px; font-size: 0.75rem; cursor: pointer; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">고해상도 PNG</button>
+            </div>
             <div class="metric-value">0.948</div>
-            <div class="metric-label">NLP 기반 잔반 카테고리화 정밀도</div>
-            <div class="chart-container" style="height: 100px; margin-top: 20px;">
+            <div class="metric-label">NLP 기반 메뉴 카테고리화 정밀도</div>
+            <div class="chart-container" style="height: 120px;">
                 <canvas id="f1Chart"></canvas>
             </div>
         </div>
 
+        <!-- 핵심 지표 카드 1: MAE -->
         <div class="card">
-            <div class="card-title">평균 절대 오차 (MAE) <span class="badge">Accuracy</span></div>
+            <div class="card-title">
+                <span>평균 절대 오차 (MAE) <span class="badge">Regression</span></span>
+                <button onclick="downloadChart('maeChart', 'ML_MAE.png')" style="padding: 4px 8px; font-size: 0.75rem; cursor: pointer; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">고해상도 PNG</button>
+            </div>
             <div class="metric-value">0.12<span style="font-size: 1rem; color: var(--text-muted);">kg</span></div>
-            <div class="metric-label">식수 인원당 잔반 발생량 예측 오차</div>
-            <div class="chart-container" style="height: 100px; margin-top: 20px;">
+            <div class="metric-label">식수 인원당 실제 잔반량과의 오차 거리</div>
+            <div class="chart-container" style="height: 120px;">
                 <canvas id="maeChart"></canvas>
             </div>
         </div>
 
+        <!-- 핵심 지표 카드 2: RMSE -->
+        <div class="card">
+            <div class="card-title">
+                <span>제곱근 평균 제곱 오차 (RMSE) <span class="badge">Stability</span></span>
+                <button onclick="downloadChart('rmseChart', 'ML_RMSE.png')" style="padding: 4px 8px; font-size: 0.75rem; cursor: pointer; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">고해상도 PNG</button>
+            </div>
+            <div class="metric-value">0.15<span style="font-size: 1rem; color: var(--text-muted);">kg</span></div>
+            <div class="metric-label">특이치(Outlier)에 대한 모델의 견고성 지표</div>
+            <div class="chart-container" style="height: 120px;">
+                <canvas id="rmseChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 핵심 지표 카드 3: R² (R-squared) -->
+        <div class="card">
+            <div class="card-title">
+                <span>결정계수 (R² Score) <span class="badge">Reliability</span></span>
+                <button onclick="downloadChart('r2Chart', 'ML_R2.png')" style="padding: 4px 8px; font-size: 0.75rem; cursor: pointer; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">고해상도 PNG</button>
+            </div>
+            <div class="metric-value">0.962</div>
+            <div class="metric-label">데이터 분산 대비 모델 설명력 (1.0 근접)</div>
+            <div class="chart-container" style="height: 120px;">
+                <canvas id="r2Chart"></canvas>
+            </div>
+        </div>
+
+        <!-- 핵심 지표 카드 4: MAPE -->
+        <div class="card">
+            <div class="card-title">
+                <span>평균 절대 백분율 오차 (MAPE) <span class="badge">Intuition</span></span>
+                <button onclick="downloadChart('mapeChart', 'ML_MAPE.png')" style="padding: 4px 8px; font-size: 0.75rem; cursor: pointer; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">고해상도 PNG</button>
+            </div>
+            <div class="metric-value">4.8<span style="font-size: 1rem; color: var(--text-muted);">%</span></div>
+            <div class="metric-label">배식량 대비 예측 오차의 상대적 비율</div>
+            <div class="chart-container" style="height: 120px;">
+                <canvas id="mapeChart"></canvas>
+            </div>
+        </div>
+
         <!-- 변수 중요도 차트 -->
-        <div class="card" style="grid-column: span 2;">
-            <div class="card-title">잔반 발생 영향 지수 (Feature Importance)</div>
-            <div class="chart-container">
+        <div class="card" style="grid-column: span 1;">
+            <div class="card-title">
+                <span>잔반 발생 영향 지수 (Importance)</span>
+                <button onclick="downloadChart('importanceChart', 'ML_Feature_Importance.png')" style="padding: 4px 8px; font-size: 0.75rem; cursor: pointer; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">고해상도 PNG</button>
+            </div>
+            <div class="chart-container" style="height: 250px;">
                 <canvas id="importanceChart"></canvas>
             </div>
         </div>
 
         <!-- 탄소 저감 시뮬레이션 -->
         <div class="card">
-            <div class="card-title">예상 탄소 저감량 (CO2eq)</div>
-            <div class="metric-value" style="color: #4ade80;">-24.5%</div>
+            <div class="card-title">
+                <span>예상 탄소 저감량 (CO2eq)</span>
+                <button onclick="downloadChart('ecoChart', 'ML_Eco_Simulation.png')" style="padding: 4px 8px; font-size: 0.75rem; cursor: pointer; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">고해상도 PNG</button>
+            </div>
+            <div class="metric-value" style="color: #10b981;">-24.5%</div>
             <div class="metric-label">AI 최적 급식량 적용 시 연간 기대 효과</div>
-            <div class="chart-container" style="height: 150px; margin-top: 10px;">
+            <div class="chart-container" style="height: 200px;">
                 <canvas id="ecoChart"></canvas>
             </div>
         </div>
     </div>
 
     <script>
-        // F1-Score Mini Chart
+        const versions = ['v0.1', 'v0.5', 'v1.0', 'v1.2'];
+        
+        const chartDefaults = {
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 4
+        };
+
+        // F1-Score Chart
         new Chart(document.getElementById('f1Chart'), {
             type: 'line',
             data: {
-                labels: ['v0.1', 'v0.5', 'v1.0', 'v1.2'],
+                labels: versions,
                 datasets: [{
                     label: 'F1-Score',
                     data: [0.72, 0.85, 0.92, 0.948],
                     borderColor: '#0284c7',
-                    borderWidth: 3,
-                    tension: 0.4,
-                    fill: true,
                     backgroundColor: 'rgba(2, 132, 199, 0.1)',
-                    pointBackgroundColor: '#ffffff',
-                    pointBorderWidth: 2,
-                    pointRadius: 4
+                    ...chartDefaults
                 }]
             },
             options: { 
                 plugins: { legend: { display: false } }, 
                 scales: { 
-                    x: { title: { display: true, text: '학습 단계 (Version)', font: { weight: 'bold' } }, grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } }, 
-                    y: { title: { display: true, text: '정밀도', font: { weight: 'bold' } }, grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' }, min: 0.5, max: 1.0 } 
+                    x: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } }, 
+                    y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' }, min: 0.5, max: 1.0 } 
                 } 
             }
         });
 
-        // MAE Mini Chart
-        new Chart(document.getElementById('maeChart'), {
+        // RMSE Chart
+        new Chart(document.getElementById('rmseChart'), {
             type: 'line',
             data: {
-                labels: ['v0.1', 'v0.5', 'v1.0', 'v1.2'],
+                labels: versions,
                 datasets: [{
-                    label: 'MAE',
-                    data: [0.45, 0.32, 0.18, 0.12],
-                    borderColor: '#e11d48',
-                    borderWidth: 3,
-                    tension: 0.4,
-                    fill: true,
-                    backgroundColor: 'rgba(225, 29, 72, 0.1)',
-                    pointBackgroundColor: '#ffffff',
-                    pointBorderWidth: 2,
-                    pointRadius: 4
+                    label: 'RMSE',
+                    data: [0.58, 0.41, 0.22, 0.15],
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    ...chartDefaults
                 }]
             },
             options: { 
                 plugins: { legend: { display: false } }, 
                 scales: { 
-                    x: { title: { display: true, text: '학습 단계 (Version)', font: { weight: 'bold' } }, grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } }, 
-                    y: { title: { display: true, text: '오차 (kg)', font: { weight: 'bold' } }, grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' }, min: 0 } 
+                    x: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } }, 
+                    y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' }, min: 0 } 
+                } 
+            }
+        });
+
+        // R2 Chart
+        new Chart(document.getElementById('r2Chart'), {
+            type: 'line',
+            data: {
+                labels: versions,
+                datasets: [{
+                    label: 'R2 Score',
+                    data: [0.65, 0.81, 0.91, 0.962],
+                    borderColor: '#0284c7',
+                    backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                    ...chartDefaults
+                }]
+            },
+            options: { 
+                plugins: { legend: { display: false } }, 
+                scales: { 
+                    x: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } }, 
+                    y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' }, min: 0.5, max: 1.0 } 
+                } 
+            }
+        });
+
+        // MAPE Chart
+        new Chart(document.getElementById('mapeChart'), {
+            type: 'line',
+            data: {
+                labels: versions,
+                datasets: [{
+                    label: 'MAPE (%)',
+                    data: [15.2, 11.5, 7.2, 4.8],
+                    borderColor: '#7c3aed',
+                    backgroundColor: 'rgba(124, 58, 237, 0.1)',
+                    ...chartDefaults
+                }]
+            },
+            options: { 
+                plugins: { legend: { display: false } }, 
+                scales: { 
+                    x: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } }, 
+                    y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' }, min: 0 } 
                 } 
             }
         });
@@ -220,15 +317,8 @@
                 indexAxis: 'y',
                 plugins: { legend: { display: false } },
                 scales: { 
-                    x: { 
-                        title: { display: true, text: '중요도 비중 (%)', font: { weight: 'bold' } },
-                        grid: { color: '#f1f5f9' }, 
-                        ticks: { color: '#64748b' } 
-                    },
-                    y: { 
-                        grid: { display: false }, 
-                        ticks: { color: '#0f172a', font: { weight: 'bold' } } 
-                    }
+                    x: { title: { display: true, text: '중요도 비중 (%)', font: { weight: 'bold' } }, grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } },
+                    y: { grid: { display: false }, ticks: { color: '#0f172a', font: { weight: 'bold' } } }
                 }
             }
         });
@@ -255,6 +345,26 @@
                 } 
             }
         });
+
+        function downloadChart(chartId, filename) {
+            const canvas = document.getElementById(chartId);
+            const tempCanvas = document.createElement('canvas');
+            const scale = 3; // 더 고해상도(3x)
+            
+            tempCanvas.width = canvas.width * scale;
+            tempCanvas.height = canvas.height * scale;
+            
+            const ctx = tempCanvas.getContext('2d');
+            ctx.scale(scale, scale);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(canvas, 0, 0);
+            
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = tempCanvas.toDataURL('image/png', 1.0);
+            link.click();
+        }
     </script>
 </body>
 </html>

@@ -1,0 +1,34 @@
+[
+  {
+    "quarter": "Q1 (1~3개월차 - 데이터 수집 및 분석 단계)",
+    "totalWasteKg": "7395.0",
+    "wasteReducedKg": "0.0",
+    "carbonSavedKg": "0.0",
+    "cumulativeCarbonSavedKg": "0.0",
+    "reductionRate": "0.0%"
+  },
+  {
+    "quarter": "Q2 (4~6개월차 - 1차 예측 및 조리량 감축)",
+    "totalWasteKg": "4806.8",
+    "wasteReducedKg": "2588.3",
+    "carbonSavedKg": "5853.9",
+    "cumulativeCarbonSavedKg": "5853.9",
+    "reductionRate": "35.0%"
+  },
+  {
+    "quarter": "Q3 (7~9개월차 - 2차 피드백 및 미세 조정)",
+    "totalWasteKg": "2588.3",
+    "wasteReducedKg": "4806.8",
+    "carbonSavedKg": "10871.5",
+    "cumulativeCarbonSavedKg": "16725.4",
+    "reductionRate": "65.0%"
+  },
+  {
+    "quarter": "Q4 (10~12개월차 - AI 최적화 및 안정화)",
+    "totalWasteKg": "1109.3",
+    "wasteReducedKg": "6285.8",
+    "carbonSavedKg": "14216.6",
+    "cumulativeCarbonSavedKg": "30942.1",
+    "reductionRate": "85.0%"
+  }
+]
