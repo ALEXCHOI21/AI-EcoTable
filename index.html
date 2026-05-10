@@ -558,10 +558,11 @@
             const tempCanvas = document.createElement('canvas');
             const scale = 4; // 고해상도 (4x)
             
-            const padding = 40;
-            const headerHeight = 100;
+            const padding = 50;
+            const headerHeight = 120;
+            const footerHeight = 60;
             tempCanvas.width = (originalChart.width + padding * 2) * scale;
-            tempCanvas.height = (originalChart.height + headerHeight + padding * 2) * scale;
+            tempCanvas.height = (originalChart.height + headerHeight + footerHeight + padding * 2) * scale;
             
             const ctx = tempCanvas.getContext('2d');
             ctx.scale(scale, scale);
@@ -613,20 +614,26 @@
 
             // 5. 합성 및 다운로드
             setTimeout(() => {
-                ctx.drawImage(chartCanvas, padding, y + 20, originalChart.width, originalChart.height);
+                // 차트 그리기
+                ctx.drawImage(chartCanvas, padding, y + 30, originalChart.width, originalChart.height);
 
-                // 푸터
-                ctx.fillStyle = '#94a3b8';
+                // 6. 푸터 (Branding)
+                const footerY = tempCanvas.height / scale - 25;
+                ctx.fillStyle = '#cbd5e1';
                 ctx.font = 'bold 12px "Inter", sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('© 2026 ChoiGPT Corp. Strategic Intelligence', padding, footerY);
+                
                 ctx.textAlign = 'right';
-                ctx.fillText('AI-EcoTable: Data-Driven Carbon Reduction Simulation', tempCanvas.width / scale - padding, tempCanvas.height / scale - 15);
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillText('AI-EcoTable | Carbon Reduction Simulation v1.3', tempCanvas.width / scale - padding, footerY);
 
                 const link = document.createElement('a');
                 link.download = filename;
                 link.href = tempCanvas.toDataURL('image/png', 1.0);
                 link.click();
                 tempChart.destroy();
-            }, 500);
+            }, 600);
         }
     </script>
 </body>

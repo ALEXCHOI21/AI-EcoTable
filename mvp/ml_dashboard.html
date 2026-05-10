@@ -382,11 +382,12 @@
             const tempCanvas = document.createElement('canvas');
             const scale = 4; // 고해상도 (4x) - 텍스트 포함 시 너무 크면 PPT에서 무거울 수 있어 4배로 조정
             
-            // 이미지 전체 크기 설정 (텍스트 영역 확보)
-            const padding = 40;
-            const headerHeight = 120;
+            // 이미지 전체 크기 설정 (텍스트 영역 확보 및 여백 추가)
+            const padding = 50;
+            const headerHeight = 140;
+            const footerHeight = 60; // 푸터 영역 추가 확보
             tempCanvas.width = (canvas.width + padding * 2) * scale;
-            tempCanvas.height = (canvas.height + headerHeight + padding * 2) * scale;
+            tempCanvas.height = (canvas.height + headerHeight + footerHeight + padding * 2) * scale;
             
             const ctx = tempCanvas.getContext('2d');
             ctx.scale(scale, scale);
@@ -397,25 +398,25 @@
             
             // 2. 제목 (Title)
             ctx.fillStyle = '#0f172a';
-            ctx.font = 'bold 18px "Pretendard", sans-serif';
-            ctx.fillText(title, padding, padding + 20);
+            ctx.font = 'bold 20px "Pretendard", sans-serif';
+            ctx.fillText(title, padding, padding + 25);
             
             // 3. 현재 수치 (Value)
             ctx.fillStyle = '#0284c7';
-            ctx.font = '800 42px "Pretendard", sans-serif';
-            ctx.fillText(value, padding, padding + 75);
+            ctx.font = '800 48px "Pretendard", sans-serif';
+            ctx.fillText(value, padding, padding + 85);
             
             // 4. 설명 (Label)
             ctx.fillStyle = '#64748b';
-            ctx.font = '500 14px "Pretendard", sans-serif';
-            ctx.fillText(label, padding, padding + 100);
+            ctx.font = '500 15px "Pretendard", sans-serif';
+            ctx.fillText(label, padding, padding + 115);
 
             // 5. 구분선
             ctx.strokeStyle = '#f1f5f9';
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(padding, padding + 120);
-            ctx.lineTo(tempCanvas.width / scale - padding, padding + 120);
+            ctx.moveTo(padding, padding + 135);
+            ctx.lineTo(tempCanvas.width / scale - padding, padding + 135);
             ctx.stroke();
 
             // 6. 차트용 별도 캔버스 생성 및 렌더링 (텍스트 지워짐 방지)
@@ -440,21 +441,26 @@
 
             // 7. 차트 렌더링 대기 후 합성
             setTimeout(() => {
-                // 차트 영역에 맞게 합성 (ctx.scale이 이미 적용되어 있으므로 unscaled 크기로 그림)
-                ctx.drawImage(chartCanvas, padding, padding + headerHeight + 20, canvas.width, canvas.height);
+                // 차트 영역에 맞게 합성 (헤더 아래에 배치)
+                ctx.drawImage(chartCanvas, padding, padding + headerHeight + 10, canvas.width, canvas.height);
 
-                // 8. 푸터 (Branding)
+                // 8. 푸터 (Premium Branding)
+                const footerY = tempCanvas.height / scale - 25;
                 ctx.fillStyle = '#cbd5e1';
                 ctx.font = 'bold 12px "Pretendard", sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('© 2026 ChoiGPT Corp. Strategic Intelligence', padding, footerY);
+                
                 ctx.textAlign = 'right';
-                ctx.fillText('AI-EcoTable Intelligence Engine Insight', tempCanvas.width / scale - padding, tempCanvas.height / scale - 15);
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillText('AI-EcoTable | ML Engine Insight Report v1.3', tempCanvas.width / scale - padding, footerY);
 
                 const link = document.createElement('a');
                 link.download = filename;
                 link.href = tempCanvas.toDataURL('image/png', 1.0);
                 link.click();
                 tempChart.destroy();
-            }, 500);
+            }, 600);
         }
     </script>
 </body>
